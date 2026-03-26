@@ -18,6 +18,7 @@
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
     @keyframes stagger { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
+    @keyframes slideFade { from { opacity: 0; transform: scale(1.08) } to { opacity: 1; transform: scale(1) } }
     input:focus, textarea:focus, select:focus { border-color: #0a8967 !important; outline: none; }
   </style>
 </head>
@@ -62,6 +63,37 @@
     const saveItems = (items) => { try { localStorage.setItem(SKEY,JSON.stringify(items)); return true; } catch{return false;} };
 
     // ═══════════════ COMPONENTS ═══════════════
+    const HERO_SLIDES = [
+      { img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&h=500&fit=crop", caption:"Koleksi Buku & E-Book Berkualitas" },
+      { img:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900&h=500&fit=crop", caption:"Akses Jurnal Ilmiah Kapan Saja" },
+      { img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=500&fit=crop", caption:"Repositori Skripsi Mahasiswa" },
+      { img:"https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=900&h=500&fit=crop", caption:"Modul Perkuliahan Digital" },
+      { img:"https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=900&h=500&fit=crop", caption:"Belajar Tanpa Batas Ruang & Waktu" },
+    ];
+
+    const HeroSlideshow = () => {
+      const [current,setCurrent]=useState(0);
+      const [fade,setFade]=useState(true);
+      useEffect(()=>{
+        const timer=setInterval(()=>{
+          setFade(false);
+          setTimeout(()=>{setCurrent(c=>(c+1)%HERO_SLIDES.length);setFade(true);},400);
+        },4000);
+        return ()=>clearInterval(timer);
+      },[]);
+      const slide=HERO_SLIDES[current];
+      return React.createElement("div",{style:{position:"relative",width:"100%",height:"100%",borderRadius:16,overflow:"hidden",minHeight:220}},
+        React.createElement("img",{src:slide.img,alt:slide.caption,style:{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0,opacity:fade?1:0,transform:fade?"scale(1)":"scale(1.05)",transition:"opacity 0.6s ease, transform 0.6s ease"}}),
+        React.createElement("div",{style:{position:"absolute",inset:0,background:"linear-gradient(to top, rgba(13,59,46,0.75) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)"}}),
+        React.createElement("div",{style:{position:"absolute",bottom:0,left:0,right:0,padding:"20px 22px"}},
+          React.createElement("p",{style:{margin:0,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Merriweather',serif",textShadow:"0 2px 8px rgba(0,0,0,0.3)",opacity:fade?1:0,transform:fade?"translateY(0)":"translateY(8px)",transition:"opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s"}},slide.caption)
+        ),
+        React.createElement("div",{style:{position:"absolute",bottom:10,right:16,display:"flex",gap:6}},
+          HERO_SLIDES.map((_,i)=>React.createElement("div",{key:i,onClick:()=>{setFade(false);setTimeout(()=>{setCurrent(i);setFade(true);},300);},style:{width:current===i?20:8,height:8,borderRadius:4,background:current===i?"#fff":"rgba(255,255,255,0.45)",cursor:"pointer",transition:"all 0.3s ease"}}))
+        )
+      );
+    };
+
     const Toast = ({message,show,type}) => {
       const bg = type==="success"?"linear-gradient(135deg,#0a8967,#16a085)":type==="error"?"linear-gradient(135deg,#c0392b,#e74c3c)":"linear-gradient(135deg,#2471a3,#3498db)";
       return React.createElement("div",{style:{position:"fixed",bottom:show?32:-80,left:"50%",transform:"translateX(-50%)",background:bg,color:"#fff",padding:"13px 26px",borderRadius:12,fontWeight:700,fontSize:13.5,boxShadow:"0 8px 28px rgba(0,0,0,0.2)",zIndex:9999,transition:"bottom 0.4s cubic-bezier(.68,-.55,.27,1.55)",whiteSpace:"nowrap",fontFamily:"'Nunito Sans',sans-serif"}},message);
@@ -432,17 +464,22 @@
         React.createElement("main",{style:{maxWidth:1200,margin:"0 auto",padding:"28px 24px 60px"}},
           // HOME
           page==="home" && React.createElement("div",null,
-            React.createElement("div",{style:{background:"linear-gradient(135deg,#0d3b2e08,#0a896712)",borderRadius:20,padding:"48px 36px",marginBottom:32,border:"1px solid #0a896710",position:"relative",overflow:"hidden"}},
+            React.createElement("div",{style:{background:"linear-gradient(135deg,#0d3b2e08,#0a896712)",borderRadius:20,padding:"36px",marginBottom:32,border:"1px solid #0a896710",position:"relative",overflow:"hidden"}},
               React.createElement("div",{style:{position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"#0a896708"}}),
-              React.createElement("div",{style:{position:"relative"}},
-                React.createElement("div",{style:{display:"inline-block",padding:"5px 14px",borderRadius:20,background:"#0a896718",fontSize:12,fontWeight:700,color:"#0a8967",marginBottom:14}},"📖 Digital Library · Tadris Bahasa Inggris"),
-                React.createElement("h1",{style:{margin:"0 0 12px",fontSize:"clamp(26px,4.5vw,38px)",fontWeight:900,fontFamily:"'Merriweather',serif",color:"#1a2332",lineHeight:1.2}},
-                  "Perpustakaan Digital",React.createElement("br"),React.createElement("span",{style:{color:"#0a8967"}},"Jurusan Tadris Bahasa Inggris")
+              React.createElement("div",{style:{position:"relative",display:"flex",gap:32,alignItems:"center",flexWrap:"wrap"}},
+                React.createElement("div",{style:{flex:1,minWidth:280}},
+                  React.createElement("div",{style:{display:"inline-block",padding:"5px 14px",borderRadius:20,background:"#0a896718",fontSize:12,fontWeight:700,color:"#0a8967",marginBottom:14}},"📖 Digital Library · Tadris Bahasa Inggris"),
+                  React.createElement("h1",{style:{margin:"0 0 12px",fontSize:"clamp(26px,4.5vw,38px)",fontWeight:900,fontFamily:"'Merriweather',serif",color:"#1a2332",lineHeight:1.2}},
+                    "Perpustakaan Digital",React.createElement("br"),React.createElement("span",{style:{color:"#0a8967"}},"Jurusan Tadris Bahasa Inggris")
+                  ),
+                  React.createElement("p",{style:{margin:"0 0 20px",fontSize:14.5,color:"#636e72",lineHeight:1.65,maxWidth:520}},"Akses koleksi buku, skripsi, jurnal ilmiah, dan modul perkuliahan Jurusan Tadris Bahasa Inggris secara digital."),
+                  React.createElement("div",{style:{display:"flex",gap:10,flexWrap:"wrap"}},
+                    React.createElement("button",{onClick:()=>setPage("catalog"),style:{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#0a8967,#16a085)",color:"#fff",fontSize:13.5,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(10,137,103,0.25)"}},"📚 Jelajahi Katalog"),
+                    React.createElement("button",{onClick:()=>setPage("profile"),style:{padding:"12px 24px",borderRadius:10,border:"2px solid #0a896730",background:"transparent",color:"#0a8967",fontSize:13.5,fontWeight:700,cursor:"pointer"}},"🏛️ Profil Jurusan")
+                  )
                 ),
-                React.createElement("p",{style:{margin:"0 0 20px",fontSize:14.5,color:"#636e72",lineHeight:1.65,maxWidth:520}},"Akses koleksi buku, skripsi, jurnal ilmiah, dan modul perkuliahan Jurusan Tadris Bahasa Inggris secara digital."),
-                React.createElement("div",{style:{display:"flex",gap:10,flexWrap:"wrap"}},
-                  React.createElement("button",{onClick:()=>setPage("catalog"),style:{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#0a8967,#16a085)",color:"#fff",fontSize:13.5,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(10,137,103,0.25)"}},"📚 Jelajahi Katalog"),
-                  React.createElement("button",{onClick:()=>setPage("profile"),style:{padding:"12px 24px",borderRadius:10,border:"2px solid #0a896730",background:"transparent",color:"#0a8967",fontSize:13.5,fontWeight:700,cursor:"pointer"}},"🏛️ Profil Jurusan")
+                React.createElement("div",{style:{flex:1,minWidth:300,maxWidth:480,height:280}},
+                  React.createElement(HeroSlideshow)
                 )
               )
             ),
